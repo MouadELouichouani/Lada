@@ -18,6 +18,7 @@ import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import project.ma.lada.presentation.ui.HomeScreen
+import project.ma.lada.presentation.ui.SplashScreen
 import project.ma.lada.presentation.viewmodel.GreetingViewModel
 import project.ma.lada.domain.usecase.GetGreetingUseCase
 import project.ma.lada.LadaApplication
@@ -29,14 +30,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             LadaTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    val appContainer = (application as LadaApplication).container
-                    val viewModel: GreetingViewModel = viewModel(
-                        factory = ViewModelFactory(appContainer.getGreetingUseCase)
-                    )
-                    val state by viewModel.state.collectAsState()
-                    
-                    HomeScreen(
-                        state = state,
+                    SplashScreen(
+                        onStartClick = { /* TODO: navigation */ },
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
