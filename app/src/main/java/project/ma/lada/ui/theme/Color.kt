@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 
 val primary = Color(0xFFF18001)
 val secondary = Color(0xFF71B1A1)
+val teal = Color(0xFF129575)
 val accent = Color(0xFFD9D9D9)
 val warnings = Color(0xFFFD3654)
 val warnings_light = Color(0xFFFFE1E7)
