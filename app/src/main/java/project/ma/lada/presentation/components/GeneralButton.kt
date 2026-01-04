@@ -16,10 +16,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import project.ma.lada.R
+import project.ma.lada.ui.theme.primary
 
 @Composable
 fun GeneralButton(
@@ -30,19 +33,20 @@ fun GeneralButton(
     Button(
         onClick = onClick,
         modifier = modifier
-            .fillMaxWidth()
-            .height(54.dp),
+            .fillMaxWidth(0.75f)
+            .height(58.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFFFF7F00) // Orange color from design
+            containerColor = primary
         ),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(10.dp),
         contentPadding = PaddingValues(horizontal = 16.dp)
     ) {
         Text(
             text = text,
             color = Color.White,
             fontSize = 16.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily(Font(R.font.poppins)),
         )
         Spacer(modifier = Modifier.width(8.dp))
         Image(
