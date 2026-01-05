@@ -12,14 +12,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import project.ma.lada.ui.theme.LadaTheme
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModel
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import project.ma.lada.presentation.ui.HomeScreen
-import project.ma.lada.presentation.viewmodel.GreetingViewModel
-import project.ma.lada.domain.usecase.GetGreetingUseCase
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import project.ma.lada.presentation.navigation.Screen
+import project.ma.lada.presentation.ui.SignInScreen
+import project.ma.lada.presentation.ui.SplashScreen
 import project.ma.lada.LadaApplication
 
 class MainActivity : ComponentActivity() {
@@ -29,30 +27,26 @@ class MainActivity : ComponentActivity() {
         setContent {
             LadaTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    val appContainer = (application as LadaApplication).container
-                    val viewModel: GreetingViewModel = viewModel(
-                        factory = ViewModelFactory(appContainer.getGreetingUseCase)
-                    )
-                    val state by viewModel.state.collectAsState()
-                    
-                    HomeScreen(
-                        state = state,
+                    val navController = rememberNavController()
+
+                    NavHost(
+                        navController = navController,
+                        startDestination = Screen.Splash.route,
                         modifier = Modifier.padding(innerPadding)
-                    )
+                    ) {
+                        composable(Screen.Splash.route) {
+                            SplashScreen(
+                                onStartClick = { navController.navigate(Screen.SignIn.route) }
+                            )
+                        }
+                        composable(Screen.SignIn.route) {
+                            SignInScreen(
+                                onSignInClick = { /* TODO: navigation to Home? */ }
+                            )
+                        }
+                    }
                 }
             }
         }
-    }
-}
-
-class ViewModelFactory(
-    private val getGreetingUseCase: GetGreetingUseCase
-) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(GreetingViewModel::class.java)) {
-            return GreetingViewModel(getGreetingUseCase) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
