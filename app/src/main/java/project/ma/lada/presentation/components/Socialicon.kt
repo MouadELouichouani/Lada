@@ -13,6 +13,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -21,29 +22,31 @@ fun SocialButton(
     contentDescription: String? = null,
     backgroundColor: Color = Color.White,
     iconTint: Color? = null,
-    size: Dp = 50.dp,
+    buttonSize: Dp = 50.dp,
+    iconSize: Dp = 24.dp,
     cornerRadius: Dp = 12.dp,
     onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier.size(size),
+        modifier = modifier.size(buttonSize),
         shape = RoundedCornerShape(cornerRadius),
         colors = ButtonDefaults.buttonColors(
             containerColor = backgroundColor
         ),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp),
-        contentPadding = ButtonDefaults.ContentPadding
+        contentPadding = PaddingValues(0.dp)
     ) {
         Image(
             painter = painterResource(id = iconRes),
             contentDescription = contentDescription,
-            modifier = Modifier.size(size / 2),
+            modifier = Modifier.size(iconSize),
             colorFilter = iconTint?.let { ColorFilter.tint(it) }
         )
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 fun SocialButtonPreview() {
