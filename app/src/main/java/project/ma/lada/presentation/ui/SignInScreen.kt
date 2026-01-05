@@ -1,8 +1,10 @@
 package project.ma.lada.presentation.ui
 
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,15 +15,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -37,21 +40,57 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import project.ma.lada.R
 import project.ma.lada.presentation.components.GeneralButton
 import project.ma.lada.presentation.components.SocialButton
+import project.ma.lada.presentation.viewmodel.AuthUiState
+import project.ma.lada.presentation.viewmodel.AuthViewModel
 import project.ma.lada.ui.theme.primary
 import project.ma.lada.ui.theme.teal
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
 @Composable
 fun SignInScreen(
-    onSignInClick: () -> Unit = {},
+    onLoginSuccess: () -> Unit = {},
+    onSignUpClick: () -> Unit = {},
+    viewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     modifier: Modifier = Modifier
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    
+    val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+            account?.idToken?.let { idToken ->
+                viewModel.signInWithGoogle(idToken)
+            }
+        } catch (e: ApiException) {
+            Toast.makeText(context, "Google Sign In Failed: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    LaunchedEffect(uiState) {
+        when (uiState) {
+            is AuthUiState.Success -> {
+                onLoginSuccess()
+            }
+            is AuthUiState.Error -> {
+                Toast.makeText(context, (uiState as AuthUiState.Error).message, Toast.LENGTH_SHORT).show()
+            }
+            else -> {}
+        }
+    }
 
     Column(
         modifier = modifier
@@ -139,14 +178,29 @@ fun SignInScreen(
 
         Spacer(modifier = Modifier.height(50.dp))
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            GeneralButton(
-                text = "Sign In",
-                onClick = onSignInClick
-            )
+        if (uiState is AuthUiState.Loading) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator(color = primary)
+            }
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                GeneralButton(
+                    text = "Sign In",
+                    onClick = {
+                        if (email.isNotBlank() && password.isNotBlank()) {
+                            viewModel.signInWithEmail(email, password)
+                        } else {
+                            Toast.makeText(context, "Please enter all fields", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -174,7 +228,15 @@ fun SignInScreen(
             SocialButton(
                 iconRes = R.drawable.google,
                 backgroundColor = Color.White,
-                iconTint = null
+                iconTint = null,
+                onClick = {
+                    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestIdToken(context.getString(R.string.default_web_client_id))
+                        .requestEmail()
+                        .build()
+                    val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                    googleSignInLauncher.launch(googleSignInClient.signInIntent)
+                }
             )
             
             Spacer(modifier = Modifier.width(16.dp))
@@ -202,7 +264,7 @@ fun SignInScreen(
                 fontSize = 12.sp,
                 color = teal,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable { /* TODO */ }
+                modifier = Modifier.clickable { onSignUpClick() }
             )
         }
     }
