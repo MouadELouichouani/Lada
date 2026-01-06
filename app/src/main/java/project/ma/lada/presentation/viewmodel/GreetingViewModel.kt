@@ -9,6 +9,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import project.ma.lada.LadaApplication
 
 class GreetingViewModel(
     private val getGreetingUseCase: GetGreetingUseCase
@@ -39,9 +43,9 @@ class GreetingViewModel(
         }.launchIn(viewModelScope)
     }
     companion object {
-        val Factory: androidx.lifecycle.ViewModelProvider.Factory = androidx.lifecycle.viewmodel.initializer.viewModelFactory {
-            androidx.lifecycle.viewmodel.initializer.initializer {
-                val application = (this[androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as project.ma.lada.LadaApplication)
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val application = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as LadaApplication)
                 GreetingViewModel(application.container.getGreetingUseCase)
             }
         }
