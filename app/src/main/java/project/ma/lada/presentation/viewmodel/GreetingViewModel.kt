@@ -38,4 +38,12 @@ class GreetingViewModel(
             }
         }.launchIn(viewModelScope)
     }
+    companion object {
+        val Factory: androidx.lifecycle.ViewModelProvider.Factory = androidx.lifecycle.viewmodel.initializer.viewModelFactory {
+            androidx.lifecycle.viewmodel.initializer.initializer {
+                val application = (this[androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as project.ma.lada.LadaApplication)
+                GreetingViewModel(application.container.getGreetingUseCase)
+            }
+        }
+    }
 }
