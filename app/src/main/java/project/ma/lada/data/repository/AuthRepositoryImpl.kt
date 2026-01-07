@@ -1,7 +1,5 @@
 package project.ma.lada.data.repository
 
-import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.channels.awaitClose
@@ -11,14 +9,11 @@ import kotlinx.coroutines.tasks.await
 import project.ma.lada.domain.model.User
 import project.ma.lada.domain.repository.AuthRepository
 
-class AuthRepositoryImpl(
-    private val auth: FirebaseAuth
-) : AuthRepository {
+class AuthRepositoryImpl(private val auth: FirebaseAuth) : AuthRepository {
 
     override val currentUser: Flow<User?> = callbackFlow {
-        val listener = FirebaseAuth.AuthStateListener { auth ->
-            trySend(auth.currentUser?.toDomain())
-        }
+        val listener =
+                FirebaseAuth.AuthStateListener { auth -> trySend(auth.currentUser?.toDomain()) }
         auth.addAuthStateListener(listener)
         awaitClose { auth.removeAuthStateListener(listener) }
     }
@@ -27,8 +22,9 @@ class AuthRepositoryImpl(
         return try {
             val credential = GoogleAuthProvider.getCredential(idToken, null)
             val authResult = auth.signInWithCredential(credential).await()
-            val user = authResult.user?.toDomain() 
-                ?: return Result.failure(Exception("User not found after sign in"))
+            val user =
+                    authResult.user?.toDomain()
+                            ?: return Result.failure(Exception("User not found after sign in"))
             Result.success(user)
         } catch (e: Exception) {
             Result.failure(e)
@@ -38,20 +34,31 @@ class AuthRepositoryImpl(
     override suspend fun signInWithEmail(email: String, password: String): Result<User> {
         return try {
             val authResult = auth.signInWithEmailAndPassword(email, password).await()
-            val user = authResult.user?.toDomain()
-                ?: return Result.failure(Exception("User not found after sign in"))
+            val user =
+                    authResult.user?.toDomain()
+                            ?: return Result.failure(Exception("User not found after sign in"))
             Result.success(user)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    override suspend fun signUpWithEmail(email: String, password: String): Result<User> {
+    override suspend fun signUpWithEmail(
+            name: String,
+            email: String,
+            password: String
+    ): Result<User> {
         return try {
             val authResult = auth.createUserWithEmailAndPassword(email, password).await()
-            val user = authResult.user?.toDomain()
-                ?: return Result.failure(Exception("User not created"))
-            Result.success(user)
+            val firebaseUser =
+                    authResult.user ?: return Result.failure(Exception("User not created"))
+
+            // Update profile with name
+            val profileUpdates =
+                    com.google.firebase.auth.userProfileChangeRequest { displayName = name }
+            firebaseUser.updateProfile(profileUpdates).await()
+
+            Result.success(firebaseUser.toDomain())
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -63,10 +70,10 @@ class AuthRepositoryImpl(
 
     private fun com.google.firebase.auth.FirebaseUser.toDomain(): User {
         return User(
-            uid = uid,
-            email = email,
-            displayName = displayName,
-            photoUrl = photoUrl?.toString()
+                uid = uid,
+                email = email,
+                displayName = displayName,
+                photoUrl = photoUrl?.toString()
         )
     }
 }

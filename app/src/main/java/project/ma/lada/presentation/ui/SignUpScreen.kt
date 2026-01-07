@@ -41,7 +41,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -59,10 +58,10 @@ import project.ma.lada.ui.theme.teal
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(
-    onSignUpSuccess: () -> Unit = {},
-    onSignInClick: () -> Unit = {},
-    viewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
-    modifier: Modifier = Modifier
+        onSignUpSuccess: () -> Unit = {},
+        onSignInClick: () -> Unit = {},
+        viewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
+        modifier: Modifier = Modifier
 ) {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -73,19 +72,23 @@ fun SignUpScreen(
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    val googleSignInLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.getResult(ApiException::class.java)
-            account?.idToken?.let { idToken ->
-                viewModel.signInWithGoogle(idToken)
+    val googleSignInLauncher =
+            rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.StartActivityForResult()
+            ) { result ->
+                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                try {
+                    val account = task.getResult(ApiException::class.java)
+                    account?.idToken?.let { idToken -> viewModel.signInWithGoogle(idToken) }
+                } catch (e: ApiException) {
+                    Toast.makeText(
+                                    context,
+                                    "Google Sign In Failed: ${e.message}",
+                                    Toast.LENGTH_SHORT
+                            )
+                            .show()
+                }
             }
-        } catch (e: ApiException) {
-            Toast.makeText(context, "Google Sign In Failed: ${e.message}", Toast.LENGTH_SHORT).show()
-        }
-    }
 
     LaunchedEffect(uiState) {
         when (uiState) {
@@ -93,262 +96,264 @@ fun SignUpScreen(
                 onSignUpSuccess()
             }
             is AuthUiState.Error -> {
-                Toast.makeText(context, (uiState as AuthUiState.Error).message, Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, (uiState as AuthUiState.Error).message, Toast.LENGTH_SHORT)
+                        .show()
             }
             else -> {}
         }
     }
 
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = 32.dp)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.Center
+            modifier =
+                    modifier.fillMaxSize()
+                            .padding(horizontal = 32.dp)
+                            .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Center
     ) {
         Spacer(modifier = Modifier.height(50.dp))
-        
+
         Text(
-            text = "Create an account",
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily(Font(R.font.poppins_bold)),
-            color = Color.Black
+                text = "Create an account",
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily(Font(R.font.poppins_bold)),
+                color = Color.Black
         )
         Text(
-            text = "Let's help you set up your account,\nit won't take long.",
-            fontSize = 12.sp,
-            fontFamily = FontFamily(Font(R.font.poppins_light)),
-            color = Color.Black,
-            lineHeight = 20.sp
+                text = "Let's help you set up your account,\nit won't take long.",
+                fontSize = 12.sp,
+                fontFamily = FontFamily(Font(R.font.poppins_light)),
+                color = Color.Black,
+                lineHeight = 20.sp
         )
 
         Spacer(modifier = Modifier.height(30.dp))
 
         // Name
         Text(
-            text = "Name",
-            fontSize = 14.sp,
-            fontFamily = FontFamily(Font(R.font.poppins)),
-            color = Color.Black
+                text = "Name",
+                fontSize = 14.sp,
+                fontFamily = FontFamily(Font(R.font.poppins)),
+                color = Color.Black
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
-            value = name,
-            onValueChange = { name = it },
-            placeholder = { Text("Enter Name", color = Color.Gray) },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                unfocusedBorderColor = Color.LightGray,
-                focusedBorderColor = primary
-            ),
-            singleLine = true
+                value = name,
+                onValueChange = { name = it },
+                placeholder = { Text("Enter Name", color = Color.Gray) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors =
+                        OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
+                                unfocusedBorderColor = Color.LightGray,
+                                focusedBorderColor = primary
+                        ),
+                singleLine = true
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Email
         Text(
-            text = "Email",
-            fontSize = 14.sp,
-            fontFamily = FontFamily(Font(R.font.poppins)),
-            color = Color.Black
+                text = "Email",
+                fontSize = 14.sp,
+                fontFamily = FontFamily(Font(R.font.poppins)),
+                color = Color.Black
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            placeholder = { Text("Enter Email", color = Color.Gray) },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                unfocusedBorderColor = Color.LightGray,
-                focusedBorderColor = primary
-            ),
-            singleLine = true
+                value = email,
+                onValueChange = { email = it },
+                placeholder = { Text("Enter Email", color = Color.Gray) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors =
+                        OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
+                                unfocusedBorderColor = Color.LightGray,
+                                focusedBorderColor = primary
+                        ),
+                singleLine = true
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Password
         Text(
-            text = "Password",
-            fontSize = 14.sp,
-            fontFamily = FontFamily(Font(R.font.poppins)),
-            color = Color.Black
+                text = "Password",
+                fontSize = 14.sp,
+                fontFamily = FontFamily(Font(R.font.poppins)),
+                color = Color.Black
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            placeholder = { Text("Enter Password", color = Color.Gray) },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                unfocusedBorderColor = Color.LightGray,
-                focusedBorderColor = primary
-            ),
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            singleLine = true
+                value = password,
+                onValueChange = { password = it },
+                placeholder = { Text("Enter Password", color = Color.Gray) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors =
+                        OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
+                                unfocusedBorderColor = Color.LightGray,
+                                focusedBorderColor = primary
+                        ),
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                singleLine = true
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Confirm Password
         Text(
-            text = "Confirm Password",
-            fontSize = 14.sp,
-            fontFamily = FontFamily(Font(R.font.poppins)),
-            color = Color.Black
+                text = "Confirm Password",
+                fontSize = 14.sp,
+                fontFamily = FontFamily(Font(R.font.poppins)),
+                color = Color.Black
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
-            value = confirmPassword,
-            onValueChange = { confirmPassword = it },
-            placeholder = { Text("Retype Password", color = Color.Gray) },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                unfocusedBorderColor = Color.LightGray,
-                focusedBorderColor = primary
-            ),
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            singleLine = true
+                value = confirmPassword,
+                onValueChange = { confirmPassword = it },
+                placeholder = { Text("Retype Password", color = Color.Gray) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors =
+                        OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
+                                unfocusedBorderColor = Color.LightGray,
+                                focusedBorderColor = primary
+                        ),
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                singleLine = true
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Terms and Conditions
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             Checkbox(
-                checked = isTermsAccepted,
-                onCheckedChange = { isTermsAccepted = it },
-                colors = CheckboxDefaults.colors(
-                    checkedColor = teal,
-                    uncheckedColor = teal,
-                    checkmarkColor = Color.White
-                )
+                    checked = isTermsAccepted,
+                    onCheckedChange = { isTermsAccepted = it },
+                    colors =
+                            CheckboxDefaults.colors(
+                                    checkedColor = teal,
+                                    uncheckedColor = teal,
+                                    checkmarkColor = Color.White
+                            )
             )
             Text(
-                text = "Accept terms & Condition",
-                fontSize = 12.sp,
-                fontFamily = FontFamily(Font(R.font.poppins)),
-                color = teal,
-                modifier = Modifier.clickable { isTermsAccepted = !isTermsAccepted }
+                    text = "Accept terms & Condition",
+                    fontSize = 12.sp,
+                    fontFamily = FontFamily(Font(R.font.poppins)),
+                    color = teal,
+                    modifier = Modifier.clickable { isTermsAccepted = !isTermsAccepted }
             )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         if (uiState is AuthUiState.Loading) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 CircularProgressIndicator(color = primary)
             }
         } else {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 GeneralButton(
-                    text = "Sign Up",
-                    onClick = {
-                        if (name.isBlank() || email.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
-                            Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
-                        } else if (password != confirmPassword) {
-                            Toast.makeText(context, "Passwords do not match", Toast.LENGTH_SHORT).show()
-                        } else if (!isTermsAccepted) {
-                            Toast.makeText(context, "Please accept the terms", Toast.LENGTH_SHORT).show()
-                        } else {
-                            viewModel.signUpWithEmail(email, password)
+                        text = "Sign Up",
+                        onClick = {
+                            if (name.isBlank() ||
+                                            email.isBlank() ||
+                                            password.isBlank() ||
+                                            confirmPassword.isBlank()
+                            ) {
+                                Toast.makeText(
+                                                context,
+                                                "Please fill in all fields",
+                                                Toast.LENGTH_SHORT
+                                        )
+                                        .show()
+                            } else if (password != confirmPassword) {
+                                Toast.makeText(
+                                                context,
+                                                "Passwords do not match",
+                                                Toast.LENGTH_SHORT
+                                        )
+                                        .show()
+                            } else if (!isTermsAccepted) {
+                                Toast.makeText(
+                                                context,
+                                                "Please accept the terms",
+                                                Toast.LENGTH_SHORT
+                                        )
+                                        .show()
+                            } else {
+                                viewModel.signUpWithEmail(name, email, password)
+                            }
                         }
-                    }
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Divider(modifier = Modifier.weight(1f), color = Color.LightGray)
             Text(
-                text = "Or Sign In With",
-                fontSize = 12.sp,
-                color = Color.Gray,
-                modifier = Modifier.padding(horizontal = 8.dp)
+                    text = "Or Sign In With",
+                    fontSize = 12.sp,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(horizontal = 8.dp)
             )
             Divider(modifier = Modifier.weight(1f), color = Color.LightGray)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             SocialButton(
-                iconRes = R.drawable.google,
-                backgroundColor = Color.White,
-                iconTint = null,
-                onClick = {
-                    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestIdToken(context.getString(R.string.default_web_client_id))
-                        .requestEmail()
-                        .build()
-                    val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                    googleSignInLauncher.launch(googleSignInClient.signInIntent)
-                }
+                    iconRes = R.drawable.google,
+                    backgroundColor = Color.White,
+                    iconTint = null,
+                    onClick = {
+                        val gso =
+                                GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                        .requestIdToken(
+                                                context.getString(R.string.default_web_client_id)
+                                        )
+                                        .requestEmail()
+                                        .build()
+                        val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                        googleSignInLauncher.launch(googleSignInClient.signInIntent)
+                    }
             )
-            
+
             Spacer(modifier = Modifier.width(16.dp))
 
-            SocialButton(
-                iconRes = R.drawable.apple,
-                backgroundColor = Color.White,
-                iconTint = null
-            )
+            SocialButton(iconRes = R.drawable.apple, backgroundColor = Color.White, iconTint = null)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+            Text(text = "Already a member? ", fontSize = 12.sp, color = Color.Black)
             Text(
-                text = "Already a member? ",
-                fontSize = 12.sp,
-                color = Color.Black
-            )
-            Text(
-                text = "Sign In",
-                fontSize = 12.sp,
-                color = teal,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable { onSignInClick() }
+                    text = "Sign In",
+                    fontSize = 12.sp,
+                    color = teal,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clickable { onSignInClick() }
             )
         }
-        
+
         Spacer(modifier = Modifier.height(30.dp))
     }
 }
