@@ -23,7 +23,8 @@ import project.ma.lada.presentation.ui.HomeScreen
 import project.ma.lada.presentation.ui.SignInScreen
 import project.ma.lada.presentation.ui.SignUpScreen
 import project.ma.lada.presentation.ui.SplashScreen
-import project.ma.lada.presentation.viewmodel.GreetingViewModel
+import project.ma.lada.presentation.viewmodel.AuthViewModel
+import project.ma.lada.presentation.viewmodel.RecipeViewModel
 import project.ma.lada.ui.theme.LadaTheme
 import project.ma.lada.presentation.components.CustomBottomNavigation
 
@@ -99,9 +100,16 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable(Screen.Home.route) {
-                            val greetingViewModel: GreetingViewModel = viewModel(factory = GreetingViewModel.Factory)
-                            val state by greetingViewModel.state.collectAsState()
-                            HomeScreen(state = state)
+                            val authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
+                            val recipeViewModel: RecipeViewModel = viewModel(factory = RecipeViewModel.Factory)
+                            
+                            val authUiState by authViewModel.uiState.collectAsState()
+                            val recipeUiState by recipeViewModel.recipeUiState.collectAsState()
+                            
+                            HomeScreen(
+                                authUiState = authUiState,
+                                recipeUiState = recipeUiState
+                            )
                         }
                         composable(Screen.Saved.route) {
                             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
