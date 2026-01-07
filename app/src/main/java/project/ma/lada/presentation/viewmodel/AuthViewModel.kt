@@ -1,7 +1,6 @@
 package project.ma.lada.presentation.viewmodel
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -23,9 +22,7 @@ sealed class AuthUiState {
     data class Error(val message: String) : AuthUiState()
 }
 
-class AuthViewModel(
-    private val authRepository: AuthRepository
-) : ViewModel() {
+class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
@@ -46,9 +43,8 @@ class AuthViewModel(
         viewModelScope.launch {
             _uiState.value = AuthUiState.Loading
             val result = authRepository.signInWithGoogle(idToken)
-            result.onSuccess { user ->
-                _uiState.value = AuthUiState.Success(user)
-            }.onFailure { error ->
+            result.onSuccess { user -> _uiState.value = AuthUiState.Success(user) }.onFailure {
+                    error ->
                 _uiState.value = AuthUiState.Error(error.message ?: "Google Sign In Failed")
             }
         }
@@ -58,21 +54,19 @@ class AuthViewModel(
         viewModelScope.launch {
             _uiState.value = AuthUiState.Loading
             val result = authRepository.signInWithEmail(email, password)
-            result.onSuccess { user ->
-                _uiState.value = AuthUiState.Success(user)
-            }.onFailure { error ->
+            result.onSuccess { user -> _uiState.value = AuthUiState.Success(user) }.onFailure {
+                    error ->
                 _uiState.value = AuthUiState.Error(error.message ?: "Sign In Failed")
             }
         }
     }
 
-    fun signUpWithEmail(email: String, password: String) {
+    fun signUpWithEmail(name: String, email: String, password: String) {
         viewModelScope.launch {
             _uiState.value = AuthUiState.Loading
-            val result = authRepository.signUpWithEmail(email, password)
-            result.onSuccess { user ->
-                _uiState.value = AuthUiState.Success(user)
-            }.onFailure { error ->
+            val result = authRepository.signUpWithEmail(name, email, password)
+            result.onSuccess { user -> _uiState.value = AuthUiState.Success(user) }.onFailure {
+                    error ->
                 _uiState.value = AuthUiState.Error(error.message ?: "Sign Up Failed")
             }
         }
@@ -88,7 +82,9 @@ class AuthViewModel(
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                val application = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as LadaApplication)
+                val application =
+                        (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as
+                                LadaApplication)
                 val authRepository = application.container.authRepository
                 AuthViewModel(authRepository)
             }
