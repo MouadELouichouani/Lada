@@ -44,6 +44,8 @@ android {
 
 dependencies {
 
+    implementation(libs.material3)
+
     // ---------- Compose ----------
     val composeBom = platform("androidx.compose:compose-bom:2025.12.00")
     implementation(composeBom)

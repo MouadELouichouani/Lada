@@ -7,13 +7,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -24,7 +17,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import project.ma.lada.R
 import project.ma.lada.presentation.navigation.Screen
 import project.ma.lada.ui.theme.primary
 
@@ -48,15 +43,13 @@ fun CustomBottomNavigation(
                                 onClick = { onNavigate(Screen.Home.route) },
                                 icon = {
                                         Icon(
-                                                imageVector =
-                                                        if (currentRoute == Screen.Home.route)
-                                                                Icons.Filled.Home
-                                                        else Icons.Outlined.Home,
+                                                painter = painterResource(id = R.drawable.home),
                                                 contentDescription = "Home",
                                                 tint =
                                                         if (currentRoute == Screen.Home.route)
                                                                 primary
-                                                        else Color.LightGray
+                                                        else Color.LightGray,
+                                                modifier = Modifier.size(24.dp)
                                         )
                                 },
                                 colors =
@@ -70,12 +63,14 @@ fun CustomBottomNavigation(
                                 onClick = { onNavigate(Screen.Saved.route) },
                                 icon = {
                                         Icon(
-                                                imageVector = Icons.Outlined.BookmarkBorder,
+                                                painter =
+                                                        painterResource(id = R.drawable.saved_icon),
                                                 contentDescription = "Saved",
                                                 tint =
                                                         if (currentRoute == Screen.Saved.route)
                                                                 primary
-                                                        else Color.LightGray
+                                                        else Color.LightGray,
+                                                modifier = Modifier.size(24.dp)
                                         )
                                 },
                                 colors =
@@ -91,14 +86,18 @@ fun CustomBottomNavigation(
                                 onClick = { onNavigate(Screen.Notifications.route) },
                                 icon = {
                                         Icon(
-                                                imageVector = Icons.Outlined.Notifications,
+                                                painter =
+                                                        painterResource(
+                                                                id = R.drawable.notification_icon
+                                                        ),
                                                 contentDescription = "Notifications",
                                                 tint =
                                                         if (currentRoute ==
                                                                         Screen.Notifications.route
                                                         )
                                                                 primary
-                                                        else Color.LightGray
+                                                        else Color.LightGray,
+                                                modifier = Modifier.size(24.dp)
                                         )
                                 },
                                 colors =
@@ -112,12 +111,16 @@ fun CustomBottomNavigation(
                                 onClick = { onNavigate(Screen.Profile.route) },
                                 icon = {
                                         Icon(
-                                                imageVector = Icons.Outlined.Person,
+                                                painter =
+                                                        painterResource(
+                                                                id = R.drawable.profile_icon
+                                                        ),
                                                 contentDescription = "Profile",
                                                 tint =
                                                         if (currentRoute == Screen.Profile.route)
                                                                 primary
-                                                        else Color.LightGray
+                                                        else Color.LightGray,
+                                                modifier = Modifier.size(24.dp)
                                         )
                                 },
                                 colors =
@@ -136,7 +139,10 @@ fun CustomBottomNavigation(
                         modifier = Modifier.offset(y = (-40).dp).size(64.dp)
                 ) {
                         Icon(
-                                imageVector = Icons.Default.Add,
+                                painter =
+                                        painterResource(
+                                                id = R.drawable.ic_launcher_foreground
+                                        ),
                                 contentDescription = "Add",
                                 modifier = Modifier.size(32.dp)
                         )
