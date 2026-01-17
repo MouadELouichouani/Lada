@@ -141,7 +141,7 @@ fun CustomBottomNavigation(
                         Icon(
                                 painter =
                                         painterResource(
-                                                id = R.drawable.ic_launcher_foreground
+                                                id = R.drawable.plus_icon
                                         ),
                                 contentDescription = "Add",
                                 modifier = Modifier.size(32.dp)
