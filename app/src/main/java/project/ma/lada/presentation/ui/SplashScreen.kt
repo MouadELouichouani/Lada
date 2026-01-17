@@ -1,6 +1,7 @@
 package project.ma.lada.presentation.ui
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -16,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -30,15 +32,15 @@ import project.ma.lada.presentation.components.GeneralButton
 @Preview(showBackground = true)
 @Composable
 fun SplashScreen(
-    onStartClick: () -> Unit = {},
-    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier
+        onStartClick: () -> Unit = {},
+        @SuppressLint("ModifierParameter") modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         Image(
-            painter = painterResource(id = R.drawable.splash_pic),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
+                painter = painterResource(id = R.drawable.splash_pic),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
         )
 
         Box(
@@ -51,53 +53,59 @@ fun SplashScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.weight(0.5f))
-            
+
             Image(
-                painter = painterResource(id = R.drawable.frame_2),
-                contentDescription = null,
-                modifier = Modifier.size(80.dp)
+                    painter = painterResource(id = R.drawable.frame_2),
+                    contentDescription = null,
+                    modifier = Modifier.size(80.dp)
             )
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            
+
             Text(
-                text = "100K+ Premium Recipe",
-                color = Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
+                    text = "100K+ Premium Recipe",
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
             )
-            
+
             Spacer(modifier = Modifier.weight(1.5f))
 
             Text(
-                text = "Get\nCooking",
-                color = Color.White,
-                fontSize = 52.sp,
-                fontFamily = FontFamily(Font(R.font.poppins)),
-                lineHeight = 60.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
+                    text = "Get\nCooking",
+                    color = Color.White,
+                    fontSize = 52.sp,
+                    fontFamily = FontFamily(Font(R.font.poppins)),
+                    lineHeight = 60.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
             )
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             Text(
-                text = "Simple way to find Tasty Recipe",
-                color = Color.White,
-                fontSize = 16.sp,
-                textAlign = TextAlign.Center
+                    text = "Simple way to find Tasty Recipe",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Center
             )
-            
+
             Spacer(modifier = Modifier.height(48.dp))
-            
+
+            val context = LocalContext.current
             GeneralButton(
-                text = "Start Cooking",
-                onClick = onStartClick
+                    text = "Start Cooking",
+                    onClick = {
+                        val sharedPreferences =
+                                context.getSharedPreferences("lada_prefs", Context.MODE_PRIVATE)
+                        sharedPreferences.edit().putBoolean("has_seen_splash", true).apply()
+                        onStartClick()
+                    }
             )
-            
+
             Spacer(modifier = Modifier.height(48.dp))
         }
     }

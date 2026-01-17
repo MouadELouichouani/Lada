@@ -45,6 +45,8 @@ android {
 dependencies {
 
     implementation(libs.material3)
+    implementation(libs.androidx.foundation.layout)
+    implementation(libs.androidx.compose.foundation)
 
     // ---------- Compose ----------
     val composeBom = platform("androidx.compose:compose-bom:2025.12.00")
@@ -81,4 +83,7 @@ dependencies {
 
     // Google Sign-In
     implementation(libs.play.services.auth)
+
+    // Exyte Animated Navigation Bar
+    implementation("com.exyte:animated-navigation-bar:1.0.0")
 }

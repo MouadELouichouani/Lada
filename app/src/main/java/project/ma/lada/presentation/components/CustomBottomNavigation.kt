@@ -1,24 +1,29 @@
 package project.ma.lada.presentation.components
 
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.exyte.animatednavbar.AnimatedNavigationBar
+import com.exyte.animatednavbar.animation.balltrajectory.Parabolic
+import com.exyte.animatednavbar.animation.indendshape.Height
+import com.exyte.animatednavbar.animation.indendshape.shapeCornerRadius
 import project.ma.lada.R
 import project.ma.lada.presentation.navigation.Screen
 import project.ma.lada.ui.theme.primary
@@ -29,123 +34,96 @@ fun CustomBottomNavigation(
         onNavigate: (String) -> Unit,
         onAddClick: () -> Unit
 ) {
-        Box(
-                modifier = Modifier.fillMaxWidth().navigationBarsPadding(),
-                contentAlignment = Alignment.BottomCenter
-        ) {
-                NavigationBar(
-                        containerColor = Color.White,
-                        tonalElevation = 8.dp,
-                        modifier = Modifier.height(80.dp)
-                ) {
+        val navigationBarItems = remember {
+                listOf(
                         NavigationBarItem(
-                                selected = currentRoute == Screen.Home.route,
-                                onClick = { onNavigate(Screen.Home.route) },
-                                icon = {
-                                        Icon(
-                                                painter = painterResource(id = R.drawable.home),
-                                                contentDescription = "Home",
-                                                tint =
-                                                        if (currentRoute == Screen.Home.route)
-                                                                primary
-                                                        else Color.LightGray,
-                                                modifier = Modifier.size(24.dp)
-                                        )
-                                },
-                                colors =
-                                        NavigationBarItemDefaults.colors(
-                                                indicatorColor = Color.Transparent
-                                        )
-                        )
-
+                                id = Screen.Home.route,
+                                icon = R.drawable.home,
+                                contentDescription = "Home"
+                        ),
                         NavigationBarItem(
-                                selected = currentRoute == Screen.Saved.route,
-                                onClick = { onNavigate(Screen.Saved.route) },
-                                icon = {
-                                        Icon(
-                                                painter =
-                                                        painterResource(id = R.drawable.saved_icon),
-                                                contentDescription = "Saved",
-                                                tint =
-                                                        if (currentRoute == Screen.Saved.route)
-                                                                primary
-                                                        else Color.LightGray,
-                                                modifier = Modifier.size(24.dp)
-                                        )
-                                },
-                                colors =
-                                        NavigationBarItemDefaults.colors(
-                                                indicatorColor = Color.Transparent
-                                        )
-                        )
-
-                        Box(modifier = Modifier.weight(1f))
-
+                                id = Screen.Saved.route,
+                                icon = R.drawable.saved_icon,
+                                contentDescription = "Saved"
+                        ),
                         NavigationBarItem(
-                                selected = currentRoute == Screen.Notifications.route,
-                                onClick = { onNavigate(Screen.Notifications.route) },
-                                icon = {
-                                        Icon(
-                                                painter =
-                                                        painterResource(
-                                                                id = R.drawable.notification_icon
-                                                        ),
-                                                contentDescription = "Notifications",
-                                                tint =
-                                                        if (currentRoute ==
-                                                                        Screen.Notifications.route
-                                                        )
-                                                                primary
-                                                        else Color.LightGray,
-                                                modifier = Modifier.size(24.dp)
-                                        )
-                                },
-                                colors =
-                                        NavigationBarItemDefaults.colors(
-                                                indicatorColor = Color.Transparent
-                                        )
-                        )
-
+                                id = "add_action",
+                                icon = R.drawable.plus_icon,
+                                contentDescription = "Add"
+                        ),
                         NavigationBarItem(
-                                selected = currentRoute == Screen.Profile.route,
-                                onClick = { onNavigate(Screen.Profile.route) },
-                                icon = {
-                                        Icon(
-                                                painter =
-                                                        painterResource(
-                                                                id = R.drawable.profile_icon
-                                                        ),
-                                                contentDescription = "Profile",
-                                                tint =
-                                                        if (currentRoute == Screen.Profile.route)
-                                                                primary
-                                                        else Color.LightGray,
-                                                modifier = Modifier.size(24.dp)
-                                        )
-                                },
-                                colors =
-                                        NavigationBarItemDefaults.colors(
-                                                indicatorColor = Color.Transparent
-                                        )
+                                id = Screen.Notifications.route,
+                                icon = R.drawable.notification_icon,
+                                contentDescription = "Notifications"
+                        ),
+                        NavigationBarItem(
+                                id = Screen.Profile.route,
+                                icon = R.drawable.profile_icon,
+                                contentDescription = "Profile"
                         )
+                )
+        }
+
+        val selectedIndex =
+                remember(currentRoute) {
+                        val index = navigationBarItems.indexOfFirst { it.id == currentRoute }
+                        if (index != -1) index else 0
                 }
 
-                FloatingActionButton(
-                        onClick = onAddClick,
-                        shape = CircleShape,
-                        containerColor = primary,
-                        contentColor = Color.White,
-                        elevation = FloatingActionButtonDefaults.elevation(4.dp),
-                        modifier = Modifier.offset(y = (-40).dp).size(64.dp)
+        Box(
+                modifier =
+                        Modifier.background(Color.Transparent)
+                                .navigationBarsPadding()
+                                .fillMaxWidth(),
+                contentAlignment = Alignment.BottomCenter
+        ) {
+                AnimatedNavigationBar(
+                        modifier =
+                                Modifier.padding(horizontal = 8.dp, vertical = 20.dp).height(85.dp),
+                        selectedIndex = selectedIndex,
+                        cornerRadius = shapeCornerRadius(25.dp),
+                        ballAnimation = Parabolic(tween(300)),
+                        indentAnimation = Height(tween(300)),
+                        barColor = Color.White,
+                        ballColor = primary
                 ) {
-                        Icon(
-                                painter =
-                                        painterResource(
-                                                id = R.drawable.plus_icon
-                                        ),
-                                contentDescription = "Add",
-                                modifier = Modifier.size(32.dp)
-                        )
+                        navigationBarItems.forEachIndexed { index, item ->
+                                val isSelected = selectedIndex == index
+                                Box(
+                                        modifier =
+                                                Modifier.fillMaxSize().clickable(
+                                                                interactionSource =
+                                                                        remember {
+                                                                                MutableInteractionSource()
+                                                                        },
+                                                                indication = null
+                                                        ) {
+                                                        if (item.id == "add_action") {
+                                                                onAddClick()
+                                                        } else {
+                                                                onNavigate(item.id)
+                                                        }
+                                                },
+                                        contentAlignment = Alignment.Center
+                                ) {
+                                        androidx.compose.foundation.layout.Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                verticalArrangement = Arrangement.Center
+                                        ) {
+                                                Icon(
+                                                        painter = painterResource(id = item.icon),
+                                                        contentDescription =
+                                                                item.contentDescription,
+                                                        tint =
+                                                                if (isSelected) primary
+                                                                else Color.LightGray,
+                                                        modifier = Modifier.size(24.dp)
+                                                )
+                                        }
+                                }
+                        }
                 }
         }
 }
+
+data class NavigationBarItem(val id: String, val icon: Int, val contentDescription: String)

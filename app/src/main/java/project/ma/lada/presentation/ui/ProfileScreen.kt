@@ -1,6 +1,7 @@
 package project.ma.lada.presentation.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,7 +23,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -50,6 +50,7 @@ import project.ma.lada.R
 import project.ma.lada.domain.model.Recipe
 import project.ma.lada.domain.model.UserProfile
 import project.ma.lada.presentation.components.ProfileSavedRecipeCard
+import project.ma.lada.presentation.components.shimmerEffect
 import project.ma.lada.presentation.viewmodel.ProfileUiState
 import project.ma.lada.presentation.viewmodel.ProfileViewModel
 import project.ma.lada.ui.theme.primary
@@ -61,17 +62,13 @@ fun ProfileScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    // Load current user profile on start
-    // In a real app with navigation arguments, we'd pass the UID here
     LaunchedEffect(Unit) { viewModel.loadProfile() }
 
     Scaffold(modifier = modifier.fillMaxSize(), containerColor = Color.White) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
             when (val state = uiState) {
                 is ProfileUiState.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = primary)
-                    }
+                    ProfileSkeleton()
                 }
                 is ProfileUiState.Error -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -106,16 +103,12 @@ fun ProfileContent(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = 80.dp) // Space for bottom nav
     ) {
-        // Header
         item { ProfileHeader(userProfile = userProfile, onMoreClick = { /* TODO */}) }
 
-        // Bio
         item { ProfileBio(userProfile = userProfile) }
 
-        // Tabs
         item { ProfileTabs(selectedTab = selectedTab, onTabSelected = { selectedTab = it }) }
 
-        // Content
         if (selectedTab == "Recipe") {
             items(recipes) { recipe ->
                 ProfileSavedRecipeCard(
@@ -144,7 +137,6 @@ fun ProfileHeader(userProfile: UserProfile, onMoreClick: () -> Unit) {
     val poppins = FontFamily(Font(R.font.poppins))
 
     Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)) {
-        // Top Bar
         Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -163,13 +155,11 @@ fun ProfileHeader(userProfile: UserProfile, onMoreClick: () -> Unit) {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Profile Image and Stats
         Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Profile Image
             Surface(
                     shape = CircleShape,
                     modifier = Modifier.size(100.dp),
@@ -192,17 +182,13 @@ fun ProfileHeader(userProfile: UserProfile, onMoreClick: () -> Unit) {
                 }
             }
 
-            // Stats
             Row(
                     modifier = Modifier.weight(1f).padding(start = 24.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 ProfileStatItem("Recipe", userProfile.recipeCount.toString())
                 ProfileStatItem("Followers", formatCount(userProfile.followers.size))
-                ProfileStatItem(
-                        "Following",
-                        userProfile.following.size.toString()
-                ) // Usually raw number is fine for following
+                ProfileStatItem("Following", userProfile.following.size.toString())
             }
         }
     }
@@ -220,7 +206,6 @@ fun ProfileStatItem(label: String, value: String) {
     }
 }
 
-// Helper to format 2500 -> 2.5K
 fun formatCount(count: Int): String {
     if (count < 1000) return count.toString()
     val k = count / 1000.0
@@ -249,7 +234,7 @@ fun ProfileBio(userProfile: UserProfile) {
                 text =
                         userProfile.bio.ifEmpty {
                             "Private Chef\nPassionate about food and life \uD83C\uDF73\uD83C\uDF5B\uD83C\uDF5D\uD83C\uDF71"
-                        }, // Fallback from design
+                        },
                 fontSize = 12.sp,
                 fontFamily = poppins,
                 color = Color(0xFF484848),
@@ -288,9 +273,7 @@ fun ProfileTabs(selectedTab: String, onTabSelected: (String) -> Unit) {
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
                     elevation = null,
-                    border =
-                            if (isSelected) null
-                            else null // Design doesn't show border for unselected, just text
+                    border = if (isSelected) null else null
             ) {
                 Text(
                         text = tab,
@@ -298,6 +281,96 @@ fun ProfileTabs(selectedTab: String, onTabSelected: (String) -> Unit) {
                         fontSize = 12.sp
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun ProfileSkeleton() {
+    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 80.dp)) {
+        item {
+            Column(modifier = Modifier.padding(20.dp)) {
+                // Header Title
+                Box(
+                        modifier =
+                                Modifier.width(100.dp)
+                                        .height(24.dp)
+                                        .align(Alignment.CenterHorizontally)
+                                        .shimmerEffect()
+                )
+
+                Spacer(modifier = Modifier.height(30.dp))
+
+                Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Avatar
+                    Box(
+                            modifier =
+                                    Modifier.size(100.dp)
+                                            .shimmerEffect()
+                                            .background(Color.LightGray, CircleShape)
+                    )
+
+                    // Stats
+                    Row(
+                            modifier = Modifier.weight(1f).padding(start = 24.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        repeat(3) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Box(modifier = Modifier.size(40.dp, 16.dp).shimmerEffect())
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Box(modifier = Modifier.size(30.dp, 20.dp).shimmerEffect())
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Name & bio
+                Box(modifier = Modifier.size(120.dp, 24.dp).shimmerEffect())
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(modifier = Modifier.size(80.dp, 16.dp).shimmerEffect())
+                Spacer(modifier = Modifier.height(16.dp))
+                Box(modifier = Modifier.fillMaxWidth(0.7f).height(16.dp).shimmerEffect())
+                Spacer(modifier = Modifier.height(4.dp))
+                Box(modifier = Modifier.fillMaxWidth(0.5f).height(16.dp).shimmerEffect())
+            }
+        }
+
+        item {
+            // Tabs
+            Row(
+                    modifier = Modifier.fillMaxWidth().padding(20.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                repeat(3) {
+                    Box(
+                            modifier =
+                                    Modifier.weight(1f)
+                                            .height(40.dp)
+                                            .padding(horizontal = 4.dp)
+                                            .shimmerEffect()
+                                            .background(Color.LightGray, RoundedCornerShape(12.dp))
+                    )
+                }
+            }
+        }
+
+        items(3) {
+            // Recipe Cards
+            Box(
+                    modifier =
+                            Modifier.fillMaxWidth()
+                                    .height(115.dp)
+                                    .padding(horizontal = 20.dp, vertical = 10.dp)
+                                    .shimmerEffect()
+                                    .background(Color.LightGray, RoundedCornerShape(12.dp))
+            )
         }
     }
 }

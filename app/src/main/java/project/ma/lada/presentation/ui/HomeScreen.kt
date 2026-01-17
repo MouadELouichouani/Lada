@@ -1,12 +1,13 @@
 package project.ma.lada.presentation.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.Font
@@ -57,10 +58,7 @@ fun HomeScreen(
 
             item {
                 if (recipeUiState is RecipeUiState.Loading) {
-                    Box(
-                            modifier = Modifier.fillMaxWidth().height(240.dp),
-                            contentAlignment = Alignment.Center
-                    ) { CircularProgressIndicator() }
+                    HomeSkeleton()
                 } else {
                     LazyRow(
                             contentPadding = PaddingValues(horizontal = 20.dp),
@@ -113,6 +111,45 @@ fun HomeScreen(
                             )
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun HomeSkeleton() {
+    LazyRow(
+            contentPadding = PaddingValues(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(vertical = 16.dp)
+    ) {
+        items(3) {
+            Column(
+                    modifier =
+                            Modifier.width(150.dp)
+                                    .background(Color.White, RoundedCornerShape(16.dp))
+                                    .padding(8.dp)
+            ) {
+                // Image
+                Box(
+                        modifier =
+                                Modifier.fillMaxWidth()
+                                        .height(150.dp)
+                                        .shimmerEffect()
+                                        .background(Color.LightGray, RoundedCornerShape(12.dp))
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                // Title
+                Box(modifier = Modifier.fillMaxWidth(0.8f).height(16.dp).shimmerEffect())
+                Spacer(modifier = Modifier.height(8.dp))
+                // Bottom row (time/rating)
+                Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Box(modifier = Modifier.width(40.dp).height(12.dp).shimmerEffect())
+                    Box(modifier = Modifier.width(30.dp).height(12.dp).shimmerEffect())
                 }
             }
         }
