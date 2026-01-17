@@ -52,7 +52,7 @@ class ProfileViewModel(
             if (profileResult.isSuccess) {
                 val profile = profileResult.getOrThrow()
                 val recipes = recipeResult.getOrDefault(emptyList())
-                val isCurrentUser = currentUser?.uid == uidToLoad
+                val isCurrentUser = currentUser.uid == uidToLoad
 
                 _uiState.value =
                         ProfileUiState.Success(
@@ -61,10 +61,34 @@ class ProfileViewModel(
                                 isCurrentUser = isCurrentUser
                         )
             } else {
-                _uiState.value =
-                        ProfileUiState.Error(
-                                "Failed to load profile: ${profileResult.exceptionOrNull()?.message}"
-                        )
+                val exception = profileResult.exceptionOrNull()
+                if (exception?.message == "User profile not found" && currentUser.uid == uidToLoad
+                ) {
+                    // Auto-create profile for current user
+                    val newProfile =
+                            UserProfile(
+                                    uid = currentUser.uid,
+                                    displayName = currentUser.displayName ?: "User",
+                                    photoUrl = currentUser.photoUrl
+                            )
+                    val createResult = profileRepository.createOrUpdateProfile(newProfile)
+                    if (createResult.isSuccess) {
+                        _uiState.value =
+                                ProfileUiState.Success(
+                                        userProfile = newProfile,
+                                        recipes = emptyList(),
+                                        isCurrentUser = true
+                                )
+                    } else {
+                        _uiState.value =
+                                ProfileUiState.Error(
+                                        "Failed to create profile: ${createResult.exceptionOrNull()?.message}"
+                                )
+                    }
+                } else {
+                    _uiState.value =
+                            ProfileUiState.Error("Failed to load profile: ${exception?.message}")
+                }
             }
         }
     }
