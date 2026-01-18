@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -19,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -59,126 +61,131 @@ class MainActivity : ComponentActivity() {
                 }
 
                 val startDestination =
-                        remember(authUiState) {
-                            when (authUiState) {
-                                is AuthUiState.Success -> Screen.Home.route
-                                else ->
-                                        if (hasSeenSplash) Screen.SignIn.route
-                                        else Screen.Splash.route
-                            }
+                    remember(authUiState) {
+                        when (authUiState) {
+                            is AuthUiState.Success -> Screen.Home.route
+                            else ->
+                                if (hasSeenSplash) Screen.SignIn.route
+                                else Screen.Splash.route
                         }
+                    }
 
                 val showBottomBar =
-                        currentRoute in
-                                listOf(
-                                        Screen.Home.route,
-                                        Screen.Saved.route,
-                                        Screen.Notifications.route,
-                                        Screen.Profile.route
-                                )
+                    currentRoute in
+                            listOf(
+                                Screen.Home.route,
+                                Screen.Saved.route,
+                                Screen.Notifications.route,
+                                Screen.Profile.route
+                            )
 
-                Scaffold(
+                if (authUiState is AuthUiState.Checking) {
+                    // Show a blank background while checking auth state to prevent splash flicker
+                    Box(modifier = Modifier.fillMaxSize().background(Color.White))
+                } else {
+                    Scaffold(
                         modifier = Modifier.fillMaxSize(),
                         bottomBar = {
                             if (showBottomBar) {
                                 CustomBottomNavigation(
-                                        currentRoute = currentRoute,
-                                        onNavigate = { route ->
-                                            navController.navigate(route) {
-                                                popUpTo(navController.graph.startDestinationId) {
-                                                    saveState = true
-                                                }
-                                                launchSingleTop = true
-                                                restoreState = true
+                                    currentRoute = currentRoute,
+                                    onNavigate = { route ->
+                                        navController.navigate(route) {
+                                            popUpTo(navController.graph.startDestinationId) {
+                                                saveState = true
                                             }
-                                        },
-                                        onAddClick = { /* TODO: Implement Add action */}
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    },
+                                    onAddClick = { /* TODO: Implement Add action */ }
                                 )
                             }
                         }
-                ) { innerPadding ->
-                    NavHost(
+                    ) { innerPadding ->
+                        NavHost(
                             navController = navController,
                             startDestination = startDestination,
                             modifier = Modifier.padding(innerPadding),
                             enterTransition = {
                                 slideInHorizontally(
-                                        initialOffsetX = { 1000 },
-                                        animationSpec = tween(700)
+                                    initialOffsetX = { 1000 },
+                                    animationSpec = tween(700)
                                 ) + fadeIn(animationSpec = tween(700))
                             },
                             exitTransition = {
                                 slideOutHorizontally(
-                                        targetOffsetX = { -1000 },
-                                        animationSpec = tween(700)
+                                    targetOffsetX = { -1000 },
+                                    animationSpec = tween(700)
                                 ) + fadeOut(animationSpec = tween(700))
                             },
                             popEnterTransition = {
                                 slideInHorizontally(
-                                        initialOffsetX = { -1000 },
-                                        animationSpec = tween(700)
+                                    initialOffsetX = { -1000 },
+                                    animationSpec = tween(700)
                                 ) + fadeIn(animationSpec = tween(700))
                             },
                             popExitTransition = {
                                 slideOutHorizontally(
-                                        targetOffsetX = { 1000 },
-                                        animationSpec = tween(700)
+                                    targetOffsetX = { 1000 },
+                                    animationSpec = tween(700)
                                 ) + fadeOut(animationSpec = tween(700))
                             }
-                    ) {
-                        composable(Screen.Splash.route) {
-                            SplashScreen(
+                        ) {
+                            composable(Screen.Splash.route) {
+                                SplashScreen(
                                     onStartClick = {
                                         navController.navigate(Screen.SignIn.route) {
                                             popUpTo(Screen.Splash.route) { inclusive = true }
                                         }
                                     }
-                            )
-                        }
-                        composable(Screen.SignIn.route) {
-                            SignInScreen(
+                                )
+                            }
+                            composable(Screen.SignIn.route) {
+                                SignInScreen(
                                     onLoginSuccess = {
                                         navController.navigate(Screen.Home.route) {
                                             popUpTo(Screen.SignIn.route) { inclusive = true }
                                         }
                                     },
                                     onSignUpClick = { navController.navigate(Screen.SignUp.route) }
-                            )
-                        }
-                        composable(Screen.SignUp.route) {
-                            SignUpScreen(
+                                )
+                            }
+                            composable(Screen.SignUp.route) {
+                                SignUpScreen(
                                     onSignUpSuccess = {
                                         navController.navigate(Screen.Home.route) {
                                             popUpTo(Screen.SignUp.route) { inclusive = true }
                                         }
                                     },
                                     onSignInClick = { navController.navigate(Screen.SignIn.route) }
-                            )
-                        }
-                        composable(Screen.Home.route) {
-                            val authViewModel: AuthViewModel =
+                                )
+                            }
+                            composable(Screen.Home.route) {
+                                val authViewModel: AuthViewModel =
                                     viewModel(factory = AuthViewModel.Factory)
-                            val recipeViewModel: RecipeViewModel =
+                                val recipeViewModel: RecipeViewModel =
                                     viewModel(factory = RecipeViewModel.Factory)
 
-                            val authUiState by authViewModel.uiState.collectAsState()
-                            val recipeUiState by recipeViewModel.recipeUiState.collectAsState()
+                                val authUiState by authViewModel.uiState.collectAsState()
+                                val recipeUiState by recipeViewModel.recipeUiState.collectAsState()
 
-                            HomeScreen(authUiState = authUiState, recipeUiState = recipeUiState)
-                        }
-                        composable(Screen.Saved.route) {
-                            Box(
+                                HomeScreen(authUiState = authUiState, recipeUiState = recipeUiState)
+                            }
+                            composable(Screen.Saved.route) {
+                                Box(
                                     modifier = Modifier.fillMaxSize(),
                                     contentAlignment = Alignment.Center
-                            ) { Text(text = "Saved Recipes Screen") }
-                        }
-                        composable(Screen.Notifications.route) {
-                            Box(
+                                ) { Text(text = "Saved Recipes Screen") }
+                            }
+                            composable(Screen.Notifications.route) {
+                                Box(
                                     modifier = Modifier.fillMaxSize(),
                                     contentAlignment = Alignment.Center
-                            ) { Text(text = "Notifications Screen") }
+                                ) { Text(text = "Notifications Screen") }
+                            }
+                            composable(Screen.Profile.route) { ProfileScreen() }
                         }
-                        composable(Screen.Profile.route) { ProfileScreen() }
                     }
                 }
             }

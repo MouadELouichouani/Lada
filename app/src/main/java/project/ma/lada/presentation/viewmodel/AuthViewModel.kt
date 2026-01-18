@@ -18,13 +18,14 @@ import project.ma.lada.domain.repository.AuthRepository
 sealed class AuthUiState {
     object Idle : AuthUiState()
     object Loading : AuthUiState()
+    object Checking : AuthUiState()
     data class Success(val user: User) : AuthUiState()
     data class Error(val message: String) : AuthUiState()
 }
 
 class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
+    private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Checking)
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
     init {
