@@ -128,9 +128,3 @@ app/src/main/java/project/ma/lada/
 ```
 
 On Windows, replace `./gradlew` with `.\gradlew.bat`.
-
-## Notes
-
-- Firebase setup requires `app/google-services.json`. Keep this file out of version control if it contains private project credentials.
-- Saved recipes and notifications are already connected to navigation, but their screens currently use placeholder content.
-- Recipe creation from the bottom navigation add action is planned but not implemented yet.

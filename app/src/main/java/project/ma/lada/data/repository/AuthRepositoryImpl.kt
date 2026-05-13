@@ -64,6 +64,15 @@ class AuthRepositoryImpl(private val auth: FirebaseAuth) : AuthRepository {
         }
     }
 
+    override suspend fun sendPasswordResetEmail(email: String): Result<Unit> {
+        return try {
+            auth.sendPasswordResetEmail(email).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun signOut() {
         auth.signOut()
     }

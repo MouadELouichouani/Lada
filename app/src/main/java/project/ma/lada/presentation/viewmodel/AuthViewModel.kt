@@ -72,6 +72,12 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
         }
     }
 
+    fun sendPasswordResetEmail(email: String, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            onResult(authRepository.sendPasswordResetEmail(email))
+        }
+    }
+
     fun signOut() {
         viewModelScope.launch {
             authRepository.signOut()

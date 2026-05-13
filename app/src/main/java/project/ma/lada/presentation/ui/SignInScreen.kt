@@ -173,7 +173,28 @@ fun SignInScreen(
             fontSize = 12.sp,
             fontFamily = FontFamily(Font(R.font.poppins)),
             color = teal,
-            modifier = Modifier.clickable { /* TODO */ }
+            modifier =
+                Modifier.clickable {
+                    if (email.isBlank()) {
+                        Toast.makeText(
+                                context,
+                                "Enter your email to reset your password",
+                                Toast.LENGTH_SHORT
+                            )
+                            .show()
+                    } else {
+                        viewModel.sendPasswordResetEmail(email.trim()) { result ->
+                            val message =
+                                if (result.isSuccess) {
+                                    "Password reset email sent"
+                                } else {
+                                    result.exceptionOrNull()?.message
+                                        ?: "Failed to send password reset email"
+                                }
+                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
         )
 
         Spacer(modifier = Modifier.height(50.dp))
