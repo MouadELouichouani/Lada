@@ -1,6 +1,7 @@
 package project.ma.lada
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -9,15 +10,12 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -28,7 +26,9 @@ import androidx.navigation.compose.rememberNavController
 import project.ma.lada.presentation.components.CustomBottomNavigation
 import project.ma.lada.presentation.navigation.Screen
 import project.ma.lada.presentation.ui.HomeScreen
+import project.ma.lada.presentation.ui.NotificationsScreen
 import project.ma.lada.presentation.ui.ProfileScreen
+import project.ma.lada.presentation.ui.SavedScreen
 import project.ma.lada.presentation.ui.SignInScreen
 import project.ma.lada.presentation.ui.SignUpScreen
 import project.ma.lada.presentation.ui.SplashScreen
@@ -92,7 +92,14 @@ class MainActivity : ComponentActivity() {
                                                 restoreState = true
                                             }
                                         },
-                                        onAddClick = { /* TODO: Implement Add action */}
+                                        onAddClick = {
+                                            Toast.makeText(
+                                                            context,
+                                                            "Recipe creation is coming soon",
+                                                            Toast.LENGTH_SHORT
+                                                    )
+                                                    .show()
+                                        }
                                 )
                             }
                         }
@@ -166,18 +173,8 @@ class MainActivity : ComponentActivity() {
 
                             HomeScreen(authUiState = authUiState, recipeUiState = recipeUiState)
                         }
-                        composable(Screen.Saved.route) {
-                            Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                            ) { Text(text = "Saved Recipes Screen") }
-                        }
-                        composable(Screen.Notifications.route) {
-                            Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                            ) { Text(text = "Notifications Screen") }
-                        }
+                        composable(Screen.Saved.route) { SavedScreen() }
+                        composable(Screen.Notifications.route) { NotificationsScreen() }
                         composable(Screen.Profile.route) { ProfileScreen() }
                     }
                 }
