@@ -23,6 +23,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -58,6 +60,7 @@ import project.ma.lada.ui.theme.primary
 @Composable
 fun ProfileScreen(
         viewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory),
+        onSignOut: () -> Unit = {},
         modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -80,7 +83,8 @@ fun ProfileScreen(
                             userProfile = state.userProfile,
                             recipes = state.recipes,
                             isCurrentUser = state.isCurrentUser,
-                            onFollowClick = { viewModel.toggleFollow(state.userProfile.uid) }
+                            onFollowClick = { viewModel.toggleFollow(state.userProfile.uid) },
+                            onSignOut = onSignOut
                     )
                 }
             }
@@ -93,7 +97,8 @@ fun ProfileContent(
         userProfile: UserProfile,
         recipes: List<Recipe>,
         isCurrentUser: Boolean,
-        onFollowClick: () -> Unit
+        onFollowClick: () -> Unit,
+        onSignOut: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf("Recipe") }
     val poppinsBold = FontFamily(Font(R.font.poppins_bold))
@@ -103,7 +108,7 @@ fun ProfileContent(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = 80.dp) // Space for bottom nav
     ) {
-        item { ProfileHeader(userProfile = userProfile, onMoreClick = { /* TODO */}) }
+        item { ProfileHeader(userProfile = userProfile, onSignOut = onSignOut) }
 
         item { ProfileBio(userProfile = userProfile) }
 
@@ -132,9 +137,10 @@ fun ProfileContent(
 }
 
 @Composable
-fun ProfileHeader(userProfile: UserProfile, onMoreClick: () -> Unit) {
+fun ProfileHeader(userProfile: UserProfile, onSignOut: () -> Unit) {
     val poppinsBold = FontFamily(Font(R.font.poppins_bold))
     val poppins = FontFamily(Font(R.font.poppins))
+    var isMenuOpen by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)) {
         Row(
@@ -144,12 +150,23 @@ fun ProfileHeader(userProfile: UserProfile, onMoreClick: () -> Unit) {
         ) {
             Spacer(modifier = Modifier.width(24.dp)) // Balance centering
             Text(text = "Profile", fontSize = 18.sp, fontFamily = poppinsBold, color = Color.Black)
-            IconButton(onClick = onMoreClick) {
-                Icon(
-                        imageVector = Icons.Default.MoreHoriz,
-                        contentDescription = "More",
-                        tint = Color.Black
-                )
+            Box {
+                IconButton(onClick = { isMenuOpen = true }) {
+                    Icon(
+                            imageVector = Icons.Default.MoreHoriz,
+                            contentDescription = "More",
+                            tint = Color.Black
+                    )
+                }
+                DropdownMenu(expanded = isMenuOpen, onDismissRequest = { isMenuOpen = false }) {
+                    DropdownMenuItem(
+                            text = { Text(text = "Sign out", fontFamily = poppins) },
+                            onClick = {
+                                isMenuOpen = false
+                                onSignOut()
+                            }
+                    )
+                }
             }
         }
 
@@ -175,7 +192,7 @@ fun ProfileHeader(userProfile: UserProfile, onMoreClick: () -> Unit) {
                 } else {
                     Image(
                             painter = painterResource(id = R.drawable.splash_pic), // Fallback
-                            contentDescription = "Profile Placeholder",
+                            contentDescription = "Default profile image",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                     )
@@ -209,8 +226,9 @@ fun ProfileStatItem(label: String, value: String) {
 fun formatCount(count: Int): String {
     if (count < 1000) return count.toString()
     val k = count / 1000.0
-    return String.format("%.1fM", k)
-            .replace(".0M", "M") // Just a simple placeholder logic for "2.5M" style from design
+    if (count < 1_000_000) return String.format("%.1fK", k).replace(".0K", "K")
+    val m = count / 1_000_000.0
+    return String.format("%.1fM", m).replace(".0M", "M")
 }
 
 @Composable

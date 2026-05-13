@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import project.ma.lada.R
 import project.ma.lada.ui.theme.primary
 
@@ -48,6 +49,8 @@ fun RecentRecipeCard(
     rating: Int,
     imageRes: Int,
     authorImageRes: Int,
+    imageUrl: String? = null,
+    authorImageUrl: String? = null,
     onCardClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -107,14 +110,25 @@ fun RecentRecipeCard(
                     modifier = Modifier.fillMaxWidth(0.65f),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Image(
-                        painter = painterResource(id = authorImageRes),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
+                    if (authorImageUrl != null) {
+                        AsyncImage(
+                            model = authorImageUrl,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Image(
+                            painter = painterResource(id = authorImageRes),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
                     
                     Spacer(modifier = Modifier.width(6.dp))
                     
@@ -149,17 +163,31 @@ fun RecentRecipeCard(
             }
         }
 
-        Image(
-            painter = painterResource(id = imageRes),
-            contentDescription = title,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(90.dp)
-                .align(Alignment.CenterEnd)
-                .offset(x = 10.dp, y = (-12).dp)
-                .shadow(elevation = 10.dp, shape = CircleShape)
-                .clip(CircleShape)
-        )
+        if (imageUrl != null) {
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(90.dp)
+                    .align(Alignment.CenterEnd)
+                    .offset(x = 10.dp, y = (-12).dp)
+                    .shadow(elevation = 10.dp, shape = CircleShape)
+                    .clip(CircleShape)
+            )
+        } else {
+            Image(
+                painter = painterResource(id = imageRes),
+                contentDescription = title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(90.dp)
+                    .align(Alignment.CenterEnd)
+                    .offset(x = 10.dp, y = (-12).dp)
+                    .shadow(elevation = 10.dp, shape = CircleShape)
+                    .clip(CircleShape)
+            )
+        }
     }
 }
 

@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.Icon
@@ -20,19 +22,45 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import project.ma.lada.R
+import project.ma.lada.domain.model.Recipe
+import project.ma.lada.presentation.components.ProfileSavedRecipeCard
 import project.ma.lada.ui.theme.primary
 
 @Composable
-fun SavedScreen(modifier: Modifier = Modifier) {
+fun SavedScreen(
+        recipes: List<Recipe>,
+        onRecipeClick: (String) -> Unit,
+        onRemoveSaved: (String) -> Unit,
+        modifier: Modifier = Modifier
+) {
     Scaffold(modifier = modifier.fillMaxSize(), containerColor = Color.White) { padding ->
-        Column(
-                modifier =
-                        Modifier.padding(padding)
-                                .fillMaxSize()
-                                .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 120.dp)
+        LazyColumn(
+                modifier = Modifier.padding(padding).fillMaxSize(),
+                contentPadding =
+                        androidx.compose.foundation.layout.PaddingValues(
+                                start = 20.dp,
+                                top = 20.dp,
+                                end = 20.dp,
+                                bottom = 120.dp
+                        ),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            SavedTitle()
-            SavedEmptyState(modifier = Modifier.weight(1f))
+            item { SavedTitle() }
+            if (recipes.isEmpty()) {
+                item { SavedEmptyState(modifier = Modifier.fillParentMaxHeight(0.75f)) }
+            } else {
+                items(recipes) { recipe ->
+                    ProfileSavedRecipeCard(
+                            title = recipe.title,
+                            author = recipe.authorName.ifEmpty { "Chef" },
+                            time = recipe.time,
+                            rating = recipe.rating,
+                            imageUrl = recipe.imageUrl,
+                            onCardClick = { onRecipeClick(recipe.id) },
+                            onBookmarkClick = { onRemoveSaved(recipe.id) }
+                    )
+                }
+            }
         }
     }
 }

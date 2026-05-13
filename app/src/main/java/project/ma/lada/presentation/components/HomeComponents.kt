@@ -51,7 +51,7 @@ fun HomeHeader(name: String, profilePicUrl: String?, modifier: Modifier = Modifi
         Surface(
                 modifier = Modifier.size(44.dp),
                 shape = RoundedCornerShape(10.dp),
-                color = Color(0xFFE5CCB5) // Placeholder background
+                color = Color(0xFFE5CCB5)
         ) {
             if (profilePicUrl != null) {
                 AsyncImage(
@@ -63,7 +63,7 @@ fun HomeHeader(name: String, profilePicUrl: String?, modifier: Modifier = Modifi
             } else {
                 Image(
                         painter = painterResource(id = R.drawable.splash_pic),
-                        contentDescription = "Profile Placeholder",
+                        contentDescription = "Default profile image",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                 )

@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import project.ma.lada.R
 import project.ma.lada.ui.theme.primary
 import project.ma.lada.ui.theme.secondary
@@ -47,6 +48,7 @@ fun FoodCard(
     time: String,
     rating: String,
     imageRes: Int,
+    imageUrl: String? = null,
     onCardClick: () -> Unit = {},
     onBookmarkClick: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -125,16 +127,29 @@ fun FoodCard(
             }
         }
 
-        Image(
-            painter = painterResource(id = imageRes),
-            contentDescription = title,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(110.dp)
-                .align(Alignment.TopCenter)
-                .offset(y = 0.dp)
-                .clip(CircleShape)
-        )
+        if (imageUrl != null) {
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(110.dp)
+                    .align(Alignment.TopCenter)
+                    .offset(y = 0.dp)
+                    .clip(CircleShape)
+            )
+        } else {
+            Image(
+                painter = painterResource(id = imageRes),
+                contentDescription = title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(110.dp)
+                    .align(Alignment.TopCenter)
+                    .offset(y = 0.dp)
+                    .clip(CircleShape)
+            )
+        }
 
         Surface(
             color = Color(0xFFE1F1EE),

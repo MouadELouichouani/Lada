@@ -23,6 +23,9 @@ import project.ma.lada.presentation.viewmodel.RecipeUiState
 fun HomeScreen(
         authUiState: AuthUiState,
         recipeUiState: RecipeUiState,
+        onRecipeClick: (String) -> Unit = {},
+        onBookmarkClick: (String) -> Unit = {},
+        onFilterClick: () -> Unit = {},
         modifier: Modifier = Modifier
 ) {
     val poppinsBold = FontFamily(Font(R.font.poppins_bold))
@@ -46,7 +49,7 @@ fun HomeScreen(
                 HomeHeader(name = formattedName, profilePicUrl = user?.photoUrl)
             }
 
-            item { SearchBar(onSearch = { searchEffect = it }, onFilterClick = { /* TODO */}) }
+            item { SearchBar(onSearch = { searchEffect = it }, onFilterClick = onFilterClick) }
 
             item {
                 CategoryTabs(
@@ -57,26 +60,34 @@ fun HomeScreen(
             }
 
             item {
-                if (recipeUiState is RecipeUiState.Loading) {
-                    HomeSkeleton()
-                } else {
-                    LazyRow(
-                            contentPadding = PaddingValues(horizontal = 20.dp),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            modifier = Modifier.padding(vertical = 16.dp)
-                    ) {
-                        items(filteredRecipes) { recipe ->
-                            FoodCard(
-                                    title = recipe.title,
-                                    time = recipe.time,
-                                    rating = recipe.rating.toString(),
-                                    imageRes =
-                                            R.drawable
-                                                    .splash_pic, // Placeholder since we don't have
-                                    // images yet
-                                    onCardClick = { /* TODO */},
-                                    onBookmarkClick = { /* TODO */}
-                            )
+                when (recipeUiState) {
+                    is RecipeUiState.Loading -> HomeSkeleton()
+                    is RecipeUiState.Error -> {
+                        Text(
+                                text = recipeUiState.message,
+                                fontSize = 13.sp,
+                                fontFamily = FontFamily(Font(R.font.poppins)),
+                                color = Color.Red,
+                                modifier = Modifier.padding(20.dp)
+                        )
+                    }
+                    is RecipeUiState.Success -> {
+                        LazyRow(
+                                contentPadding = PaddingValues(horizontal = 20.dp),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                modifier = Modifier.padding(vertical = 16.dp)
+                        ) {
+                            items(filteredRecipes) { recipe ->
+                                FoodCard(
+                                        title = recipe.title,
+                                        time = recipe.time,
+                                        rating = recipe.rating.toString(),
+                                        imageRes = R.drawable.splash_pic,
+                                        imageUrl = recipe.imageUrl,
+                                        onCardClick = { onRecipeClick(recipe.id) },
+                                        onBookmarkClick = { onBookmarkClick(recipe.id) }
+                                )
+                            }
                         }
                     }
                 }
@@ -105,9 +116,11 @@ fun HomeScreen(
                                     author = recipe.authorName,
                                     time = recipe.time,
                                     rating = recipe.rating.toInt(),
-                                    imageRes = R.drawable.splash_pic, // Placeholder
-                                    authorImageRes = R.drawable.splash_pic, // Placeholder
-                                    onCardClick = { /* TODO */}
+                                    imageRes = R.drawable.splash_pic,
+                                    authorImageRes = R.drawable.splash_pic,
+                                    imageUrl = recipe.imageUrl,
+                                    authorImageUrl = recipe.authorImageUrl,
+                                    onCardClick = { onRecipeClick(recipe.id) }
                             )
                         }
                     }

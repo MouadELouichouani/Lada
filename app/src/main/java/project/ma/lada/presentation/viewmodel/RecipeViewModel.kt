@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -25,7 +26,8 @@ class RecipeViewModel(
 ) : ViewModel() {
 
     val recipeUiState: StateFlow<RecipeUiState> = recipeRepository.getAllRecipes()
-        .map { RecipeUiState.Success(it) }
+        .map<List<Recipe>, RecipeUiState> { RecipeUiState.Success(it) }
+        .catch { emit(RecipeUiState.Error(it.message ?: "Failed to load recipes")) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -35,6 +37,12 @@ class RecipeViewModel(
     fun addRecipe(recipe: Recipe) {
         viewModelScope.launch {
             recipeRepository.addRecipe(recipe)
+        }
+    }
+
+    fun addRecipe(recipe: Recipe, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            onResult(recipeRepository.addRecipe(recipe))
         }
     }
 

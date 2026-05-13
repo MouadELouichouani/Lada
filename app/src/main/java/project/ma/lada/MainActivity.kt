@@ -15,25 +15,31 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavType
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.navArgument
 import androidx.navigation.compose.rememberNavController
 import project.ma.lada.presentation.components.CustomBottomNavigation
 import project.ma.lada.presentation.navigation.Screen
+import project.ma.lada.presentation.ui.AddRecipeScreen
 import project.ma.lada.presentation.ui.HomeScreen
 import project.ma.lada.presentation.ui.NotificationsScreen
 import project.ma.lada.presentation.ui.ProfileScreen
+import project.ma.lada.presentation.ui.RecipeDetailScreen
 import project.ma.lada.presentation.ui.SavedScreen
 import project.ma.lada.presentation.ui.SignInScreen
 import project.ma.lada.presentation.ui.SignUpScreen
 import project.ma.lada.presentation.ui.SplashScreen
 import project.ma.lada.presentation.viewmodel.AuthUiState
 import project.ma.lada.presentation.viewmodel.AuthViewModel
+import project.ma.lada.presentation.viewmodel.RecipeUiState
 import project.ma.lada.presentation.viewmodel.RecipeViewModel
 import project.ma.lada.ui.theme.LadaTheme
 
@@ -57,6 +63,17 @@ class MainActivity : ComponentActivity() {
                 val hasSeenSplash = remember {
                     sharedPreferences.getBoolean("has_seen_splash", false)
                 }
+                val savedRecipeIds =
+                        remember {
+                            mutableStateListOf<String>().apply {
+                                addAll(
+                                        sharedPreferences.getStringSet(
+                                                        "saved_recipe_ids",
+                                                        emptySet()
+                                                ) ?: emptySet()
+                                )
+                            }
+                        }
 
                 val startDestination =
                         remember(authUiState) {
@@ -92,14 +109,7 @@ class MainActivity : ComponentActivity() {
                                                 restoreState = true
                                             }
                                         },
-                                        onAddClick = {
-                                            Toast.makeText(
-                                                            context,
-                                                            "Recipe creation is coming soon",
-                                                            Toast.LENGTH_SHORT
-                                                    )
-                                                    .show()
-                                        }
+                                        onAddClick = { navController.navigate(Screen.AddRecipe.route) }
                                 )
                             }
                         }
@@ -171,11 +181,133 @@ class MainActivity : ComponentActivity() {
                             val authUiState by authViewModel.uiState.collectAsState()
                             val recipeUiState by recipeViewModel.recipeUiState.collectAsState()
 
-                            HomeScreen(authUiState = authUiState, recipeUiState = recipeUiState)
+                            HomeScreen(
+                                    authUiState = authUiState,
+                                    recipeUiState = recipeUiState,
+                                    onRecipeClick = {
+                                        navController.navigate(Screen.RecipeDetail.createRoute(it))
+                                    },
+                                    onBookmarkClick = { recipeId ->
+                                        if (savedRecipeIds.contains(recipeId)) {
+                                            savedRecipeIds.remove(recipeId)
+                                            Toast.makeText(
+                                                            context,
+                                                            "Removed from saved recipes",
+                                                            Toast.LENGTH_SHORT
+                                                    )
+                                                    .show()
+                                        } else {
+                                            savedRecipeIds.add(recipeId)
+                                            Toast.makeText(
+                                                            context,
+                                                            "Recipe saved",
+                                                            Toast.LENGTH_SHORT
+                                                    )
+                                                    .show()
+                                        }
+                                        sharedPreferences
+                                                .edit()
+                                                .putStringSet(
+                                                        "saved_recipe_ids",
+                                                        savedRecipeIds.toSet()
+                                                )
+                                                .apply()
+                                    },
+                                    onFilterClick = {
+                                        Toast.makeText(
+                                                        context,
+                                                        "Use categories or search to filter recipes",
+                                                        Toast.LENGTH_SHORT
+                                                )
+                                                .show()
+                                    }
+                            )
                         }
-                        composable(Screen.Saved.route) { SavedScreen() }
+                        composable(Screen.AddRecipe.route) {
+                            val authViewModel: AuthViewModel =
+                                    viewModel(factory = AuthViewModel.Factory)
+                            val authUiState by authViewModel.uiState.collectAsState()
+                            val user =
+                                    (authUiState as? AuthUiState.Success)?.user
+
+                            AddRecipeScreen(
+                                    user = user,
+                                    onBackClick = { navController.popBackStack() },
+                                    onRecipeSaved = {
+                                        navController.navigate(Screen.Home.route) {
+                                            popUpTo(Screen.AddRecipe.route) { inclusive = true }
+                                        }
+                                    }
+                            )
+                        }
+                        composable(
+                                route = Screen.RecipeDetail.route,
+                                arguments =
+                                        listOf(navArgument("recipeId") { type = NavType.StringType })
+                        ) { backStackEntry ->
+                            val recipeViewModel: RecipeViewModel =
+                                    viewModel(factory = RecipeViewModel.Factory)
+                            val recipeUiState by recipeViewModel.recipeUiState.collectAsState()
+                            val recipeId = backStackEntry.arguments?.getString("recipeId")
+                            val recipe =
+                                    (recipeUiState as? RecipeUiState.Success)
+                                            ?.recipes
+                                            ?.firstOrNull { it.id == recipeId }
+
+                            RecipeDetailScreen(
+                                    recipe = recipe,
+                                    onBackClick = { navController.popBackStack() }
+                            )
+                        }
+                        composable(Screen.Saved.route) {
+                            val recipeViewModel: RecipeViewModel =
+                                    viewModel(factory = RecipeViewModel.Factory)
+                            val recipeUiState by recipeViewModel.recipeUiState.collectAsState()
+                            val savedRecipes =
+                                    (recipeUiState as? RecipeUiState.Success)
+                                            ?.recipes
+                                            ?.filter { savedRecipeIds.contains(it.id) }
+                                            ?: emptyList()
+
+                            SavedScreen(
+                                    recipes = savedRecipes,
+                                    onRecipeClick = {
+                                        navController.navigate(Screen.RecipeDetail.createRoute(it))
+                                    },
+                                    onRemoveSaved = { recipeId ->
+                                        savedRecipeIds.remove(recipeId)
+                                        sharedPreferences
+                                                .edit()
+                                                .putStringSet(
+                                                        "saved_recipe_ids",
+                                                        savedRecipeIds.toSet()
+                                                )
+                                                .apply()
+                                        Toast.makeText(
+                                                        context,
+                                                        "Removed from saved recipes",
+                                                        Toast.LENGTH_SHORT
+                                                )
+                                                .show()
+                                    }
+                            )
+                        }
                         composable(Screen.Notifications.route) { NotificationsScreen() }
-                        composable(Screen.Profile.route) { ProfileScreen() }
+                        composable(Screen.Profile.route) {
+                            val authViewModel: AuthViewModel =
+                                    viewModel(factory = AuthViewModel.Factory)
+
+                            ProfileScreen(
+                                    onSignOut = {
+                                        authViewModel.signOut()
+                                        navController.navigate(Screen.SignIn.route) {
+                                            popUpTo(navController.graph.startDestinationId) {
+                                                inclusive = true
+                                            }
+                                        }
+                                    }
+                            )
+                        }
                     }
                 }
             }
