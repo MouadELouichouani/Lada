@@ -1,89 +1,136 @@
-# 🍽️ Lada – Social Cooking & Recipe Sharing App  
-**Android Application • Kotlin Native**
+# Lada
 
-Lada is a modern Android app that allows users to **share recipes**, **upload cooking videos**, and **discover dishes** created by the community.  
-The main goal is to create a simple and enjoyable social space for food lovers.
+Lada is a native Android recipe app built with Kotlin and Jetpack Compose. It gives users a place to sign in, browse recipes, view profile information, and work with recipe data stored in Firebase.
 
----
+The project currently includes authentication, home feed, profile, saved, and notification navigation flows, with the data layer organized around repositories and domain models.
 
-## ✨ Features
+## Features
 
-### 🔥 Recipe Sharing  
-Users can add:
-- Recipe title  
-- Ingredients  
-- Preparation steps  
-- Photos  
-- Optional cooking video  
+- Splash, sign-in, and sign-up screens
+- Email/password authentication with Firebase Auth
+- Google sign-in support through Google Play Services
+- Recipe feed backed by Cloud Firestore
+- User profile data backed by Cloud Firestore
+- Saved, notifications, and profile destinations in the main navigation
+- Custom bottom navigation for the main app area
+- Clean layered structure with data, domain, presentation, and dependency container packages
 
-### 🎥 Video Tutorials  
-Built-in video player (ExoPlayer).
+## Tech Stack
 
-### 🧑‍🍳 Explore Recipes  
-Filter and browse recipes by:
-- Trending  
-- Most Liked  
-- Recent  
-- Categories  
+- Kotlin
+- Jetpack Compose
+- Material 3
+- Android Architecture Components
+- ViewModel
+- Kotlin Coroutines and Flow
+- Navigation Compose
+- Firebase Auth
+- Cloud Firestore
+- Firebase Analytics
+- Google Sign-In
+- Coil for image loading
+- Exyte Animated Navigation Bar
 
-### ❤️ Social Interaction  
-Users can:
-- Like  
-- Comment  
-- Save recipes  
-- Share with others  
+## Requirements
 
-### 👤 User Profiles  
-Each user has:
-- Avatar  
-- Bio  
-- Their own recipes  
-- Saved recipes  
+- Android Studio with recent Android Gradle Plugin support
+- JDK 11 or newer
+- Android SDK 36
+- A Firebase project configured for Android
 
-### 🔍 Search  
-Search by:
-- Name  
-- Ingredient  
-- Category  
-- Author  
+## Getting Started
 
----
+1. Clone the repository.
 
-# 🛠️ Tech Stack
+   ```bash
+   git clone <repository-url>
+   cd Lada
+   ```
 
-### Android (Kotlin)
-- Kotlin  
-- Jetpack Compose  
-- ViewModel & StateFlow  
-- Coroutines  
-- Navigation Component  
-- Coil (images)  
-- ExoPlayer (videos)  
+2. Open the project in Android Studio.
 
-### Backend Options
-- **Firebase (Auth, Firestore, Storage)**  
-**or**  
-- **Django REST API**
+3. Add your Firebase configuration file:
 
----
+   - Create or open a Firebase project.
+   - Add an Android app with package name `project.ma.lada`.
+   - Download `google-services.json`.
+   - Place it in the `app/` directory.
 
-# 📁 Project Structure
+4. Enable the Firebase products used by the app:
 
-app/
-├─ data/
-│ ├─ models/
-│ ├─ repository/
-│ └─ remote/
-│
-├─ ui/
-│ ├─ home/
-│ ├─ recipe/
-│ ├─ add/
-│ ├─ profile/
-│ └─ components/
-│
-├─ viewmodel/
-│
-├─ utils/
-│
-└─ di/
+   - Authentication
+   - Cloud Firestore
+   - Analytics, if desired for your Firebase setup
+
+5. Build and run the app from Android Studio, or use Gradle:
+
+   ```bash
+   ./gradlew assembleDebug
+   ```
+
+   On Windows:
+
+   ```powershell
+   .\gradlew.bat assembleDebug
+   ```
+
+## Firebase Data
+
+The app currently reads and writes these Firestore collections:
+
+- `recipes`
+- `users`
+
+Recipe documents map to the `Recipe` domain model:
+
+- `id`
+- `title`
+- `description`
+- `ingredients`
+- `steps`
+- `imageUrl`
+- `userId`
+- `rating`
+- `time`
+- `category`
+- `authorName`
+- `authorImageUrl`
+- `timestamp`
+
+## Project Structure
+
+```text
+app/src/main/java/project/ma/lada/
+|-- core/common/              # Shared utility types such as Resource
+|-- data/
+|   |-- repository/           # Firebase-backed repository implementations
+|   `-- source/               # Local/simple data sources
+|-- di/                       # AppContainer dependency wiring
+|-- domain/
+|   |-- model/                # Domain models
+|   |-- repository/           # Repository interfaces
+|   `-- usecase/              # Use cases
+|-- presentation/
+|   |-- components/           # Reusable Compose UI components
+|   |-- navigation/           # Screen routes
+|   |-- state/                # UI state models
+|   |-- ui/                   # App screens
+|   `-- viewmodel/            # ViewModels
+`-- ui/theme/                 # Compose theme, colors, and typography
+```
+
+## Useful Commands
+
+```bash
+./gradlew assembleDebug
+./gradlew test
+./gradlew connectedAndroidTest
+```
+
+On Windows, replace `./gradlew` with `.\gradlew.bat`.
+
+## Notes
+
+- Firebase setup requires `app/google-services.json`. Keep this file out of version control if it contains private project credentials.
+- Saved recipes and notifications are already connected to navigation, but their screens currently use placeholder content.
+- Recipe creation from the bottom navigation add action is planned but not implemented yet.
